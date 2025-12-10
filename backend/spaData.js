@@ -105,6 +105,10 @@ function querySpas({
     filtered.sort((a, b) => (b.budget || 0) - (a.budget || 0));
   } else if (sort === 'budget_asc') {
     filtered.sort((a, b) => (a.budget || 0) - (b.budget || 0));
+  } else if (sort === 'title_asc') {
+    filtered.sort((a, b) => a.title.localeCompare(b.title));
+  } else if (sort === 'title_desc') {
+    filtered.sort((a, b) => b.title.localeCompare(a.title));
   }
 
   const total = filtered.length;

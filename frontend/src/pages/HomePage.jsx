@@ -1,15 +1,15 @@
-// frontend/src/App.jsx
 import React, { useEffect, useMemo, useState } from 'react';
-import Header from './components/Header.jsx';
-import FiltersBar from './components/FilterBar.jsx';
-import SpaList from './components/SpaList.jsx';
-import Pagination from './components/Pagination.jsx';
-import Footer from './components/Footer.jsx';
-import SideFilters from './components/SideFilters.jsx';
+import Header from '../components/Header.jsx';
+import FiltersBar from '../components/FilterBar.jsx';
+import SpaList from '../components/SpaList.jsx';
+import Pagination from '../components/Pagination.jsx';
+import Footer from '../components/Footer.jsx';
+import SideFilters from '../components/SideFilters.jsx';
+import SortDropdown from '../components/SortDropdown.jsx';
 
 const API_BASE = import.meta?.env?.VITE_API_BASE || 'http://localhost:4000';
 
-export default function App() {
+export default function HomePage() {
   const [filters, setFilters] = useState({
     location: '',
     treatment: '',
@@ -32,7 +32,6 @@ export default function App() {
   });
   const [loading, setLoading] = useState(false);
 
-  // Load filter options
   useEffect(() => {
     fetch(`${API_BASE}/api/filters`)
       .then((r) => r.json())
@@ -40,7 +39,6 @@ export default function App() {
       .catch((err) => console.error('filters error', err));
   }, []);
 
-  // Load spas when filters or page change
   useEffect(() => {
     const params = new URLSearchParams();
     params.set('page', page);
@@ -68,7 +66,7 @@ export default function App() {
 
   const handleFilterChange = (patch) => {
     setFilters((prev) => ({ ...prev, ...patch }));
-    setPage(1); // reset to first page on filter change
+    setPage(1);
   };
 
   const handleQuickFilter = ({ location, treatment }) => {
@@ -77,6 +75,11 @@ export default function App() {
       location: location ?? prev.location,
       treatment: treatment ?? prev.treatment,
     }));
+    setPage(1);
+  };
+
+  const handleSortChange = (newSort) => {
+    setFilters((prev) => ({ ...prev, sort: newSort }));
     setPage(1);
   };
 
@@ -92,18 +95,7 @@ export default function App() {
 
         <div className="summary-row">
           <span>{summaryText}</span>
-          <span>
-            Sort:&nbsp;
-            <strong>
-              {filters.sort === 'rating_desc'
-                ? 'Rating (High–Low)'
-                : filters.sort === 'rating_asc'
-                ? 'Rating (Low–High)'
-                : filters.sort === 'budget_desc'
-                ? 'Price (High–Low)'
-                : 'Price (Low–High)'}
-            </strong>
-          </span>
+          <SortDropdown value={filters.sort} onChange={handleSortChange} />
         </div>
 
         <div className="spa-layout">
