@@ -10,6 +10,8 @@ A comprehensive web application for discovering and booking spa treatments acros
 - **Treatments Page** - Find spas by treatment type
 - **Cart Page** - Manage your selected treatments with date/time booking
 - **Payment Page** - Review and confirm your bookings
+- **Login Page** - *(Coming Soon)* User authentication
+- **Stripe Payment** - *(Coming Soon)* Secure payment processing
 
 ### 🔍 Advanced Filtering & Search
 - Filter by location, treatment type, and budget
@@ -24,10 +26,13 @@ A comprehensive web application for discovering and booking spa treatments acros
 ### 🛒 Shopping Cart System
 - Add treatments from any spa to your cart
 - Select specific treatments from spa's offering list
+- **All treatments priced at Rp 1,000,000**
 - **Mandatory date and time selection** for each booking
 - Time slots from 9:00 AM to 4:00 PM (hourly)
 - Remove items from cart
+- Real-time price calculation and total display
 - Payment button only activates when all bookings are complete
+- **Stripe payment integration coming soon**
 
 ### 🎨 Modern UI/UX
 - Clean blue color theme
@@ -50,6 +55,12 @@ A comprehensive web application for discovering and booking spa treatments acros
 - **Express 5** - Web framework
 - **CSV Parse** - Data parsing
 - **CORS** - Cross-origin resource sharing
+
+### Planned Integrations
+- **Stripe** - Payment processing (coming soon)
+- **JWT** - Authentication tokens (coming soon)
+- **PostgreSQL/MongoDB** - User data storage (coming soon)
+- **SendGrid/Mailgun** - Email notifications (coming soon)
 
 ## Project Structure
 
@@ -243,6 +254,7 @@ VITE_API_BASE=http://localhost:4000
   spaName: string,
   spaLocation: string,
   treatment: string,
+  price: number (1000000), // Rp 1,000,000
   date: string (YYYY-MM-DD),
   time: string (HH:MM AM/PM)
 }
@@ -270,21 +282,45 @@ The application uses a modular architecture:
 - Edge (latest)
 
 ## Known Limitations
-- Payment is simulated (no actual payment processing)
+- Payment is simulated (no actual payment processing yet)
 - Cart data stored in localStorage (not synced across devices)
-- No user authentication
+- No user authentication (in development)
 - No email confirmation system
 - Booking availability not checked with actual spas
 
+## Planned Features (In Development)
+
+### 🔐 User Authentication & Login System
+- **Login Page** - Secure user authentication
+- User registration and profile management
+- Password reset functionality
+- Session management
+- Protected routes for authenticated users
+- User booking history
+
+### 💳 Stripe Payment Integration
+- **Secure Payment Processing** via Stripe
+- Real-time payment confirmation
+- Multiple payment methods support
+- Payment receipts and invoices
+- Refund handling
+- Payment history tracking
+- PCI-compliant payment processing
+
 ## Future Enhancements
-- User authentication and profiles
-- Real payment gateway integration
-- Email booking confirmations
-- Spa availability calendar
-- Reviews and ratings system
-- Photo galleries for spas
-- Multi-language support
-- Mobile app versions
+- Email booking confirmations with calendar invites
+- SMS notifications for booking reminders
+- Spa availability calendar integration
+- Reviews and ratings system with user feedback
+- Photo galleries for spas with virtual tours
+- Multi-language support (English, Indonesian, etc.)
+- Mobile app versions (iOS & Android)
+- Loyalty program and rewards
+- Special offers and promotions
+- Spa comparison tool
+- Favorite spas and treatments
+- Social media integration
+- Gift vouchers and packages
 
 ## License
 ISC
