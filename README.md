@@ -95,6 +95,9 @@ new_balispaguide/
 │   ├── index.html
 │   ├── vite.config.js
 │   └── package.json
+├── references/           # Deployment guides
+│   ├── deploy_digitalcoean.md  # DigitalOcean App Platform/Droplet
+│   └── deploy_gcp.md           # Google Cloud Run + Storage/CDN
 ├── package.json           # Root convenience scripts
 └── README.md
 ```
@@ -325,7 +328,10 @@ The application uses a modular architecture:
 ## Deployment (DigitalOcean)
 - **App Platform (managed)**: Use `backend/` as a Web Service (Node 20) with `npm ci --omit=dev` and `npm start`, and `frontend/` as a Static Site with `npm install && npm run build` and `VITE_API_BASE` pointing at the API URL. Autodeploy on push recommended.
 - **Droplet (VM)**: Ubuntu, Node 20, pm2 running `backend/server.js` on `PORT=4000`, and Nginx serving the built `frontend/dist` from `/var/www/balispaguide` with `/api` proxied to `127.0.0.1:4000`. Rebuild frontend with `VITE_API_BASE=http://<droplet-ip>` then `rsync` to the web root; reload Nginx and restart pm2 as needed.
-- See `DEPLOY_DIGITALOCEAN.md` for full commands, Nginx config, and HTTPS notes.
+- See `references/deploy_digitalcoean.md` for full commands, Nginx config, and HTTPS notes (filename matches the existing doc).
+
+## Deployment (Google Cloud)
+- Full Cloud Run + Cloud Storage/CDN guide (with CI/CD and optional load balancer) lives in `references/deploy_gcp.md`.
 
 ## License
 ISC

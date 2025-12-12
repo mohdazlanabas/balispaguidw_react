@@ -17,7 +17,18 @@ const TIME_SLOTS = [
 
 export default function CartPage() {
   const navigate = useNavigate();
-  const { cartItems, removeFromCart, updateCartItem, isCartComplete, getTotalPrice, formatPrice } = useCart();
+  const {
+    cartItems,
+    removeFromCart,
+    updateCartItem,
+    isCartComplete,
+    getTotalPrice,
+    formatPrice,
+    userInfo,
+    updateUserInfo,
+    isValidEmail,
+    isValidPhone,
+  } = useCart();
 
   const handleDateChange = (itemId, date) => {
     updateCartItem(itemId, { date });
@@ -25,6 +36,10 @@ export default function CartPage() {
 
   const handleTimeChange = (itemId, time) => {
     updateCartItem(itemId, { time });
+  };
+
+  const handleQuantityChange = (itemId, quantity) => {
+    updateCartItem(itemId, { quantity: parseInt(quantity) });
   };
 
   const handleDelete = (itemId) => {
@@ -74,7 +89,14 @@ export default function CartPage() {
                   <h3 className="cart-item-spa">{item.spaName}</h3>
                   <p className="cart-item-location">{item.spaLocation}</p>
                   <p className="cart-item-treatment">{item.treatment}</p>
-                  <p className="cart-item-price">{formatPrice(item.price)}</p>
+                  <p className="cart-item-price">
+                    {formatPrice(item.price)} per package
+                    {item.quantity > 1 && (
+                      <span style={{ marginLeft: '8px', fontWeight: 'bold' }}>
+                        | Subtotal: {formatPrice(item.price * item.quantity)}
+                      </span>
+                    )}
+                  </p>
                 </div>
                 <button
                   className="delete-button"
@@ -86,6 +108,25 @@ export default function CartPage() {
               </div>
 
               <div className="cart-item-inputs">
+                <div className="input-group">
+                  <label htmlFor={`quantity-${item.id}`}>
+                    Number of Packages <span className="required">*</span>
+                  </label>
+                  <select
+                    id={`quantity-${item.id}`}
+                    value={item.quantity || 1}
+                    onChange={(e) => handleQuantityChange(item.id, e.target.value)}
+                    className="quantity-select"
+                    required
+                  >
+                    <option value="1">1 Package</option>
+                    <option value="2">2 Packages</option>
+                    <option value="3">3 Packages</option>
+                    <option value="4">4 Packages</option>
+                    <option value="5">5 Packages</option>
+                  </select>
+                </div>
+
                 <div className="input-group">
                   <label htmlFor={`date-${item.id}`}>
                     Date <span className="required">*</span>
@@ -129,6 +170,76 @@ export default function CartPage() {
               )}
             </div>
           ))}
+        </div>
+
+        {/* User Information Form */}
+        <div className="user-info-section">
+          <h2 className="section-title">Your Information</h2>
+          <p className="section-description">Please fill in your details to complete the booking</p>
+
+          <div className="user-info-form">
+            <div className="input-group">
+              <label htmlFor="user-name">
+                Full Name <span className="required">*</span>
+              </label>
+              <input
+                id="user-name"
+                type="text"
+                value={userInfo.name}
+                onChange={(e) => updateUserInfo('name', e.target.value)}
+                className="text-input"
+                placeholder="Enter your full name"
+                required
+              />
+              {!userInfo.name && (
+                <div className="validation-message-inline">Name is required</div>
+              )}
+            </div>
+
+            <div className="input-group">
+              <label htmlFor="user-email">
+                Email Address <span className="required">*</span>
+              </label>
+              <input
+                id="user-email"
+                type="email"
+                value={userInfo.email}
+                onChange={(e) => updateUserInfo('email', e.target.value)}
+                className="text-input"
+                placeholder="your.email@example.com"
+                required
+              />
+              {userInfo.email && !isValidEmail(userInfo.email) && (
+                <div className="validation-message-inline error">Please enter a valid email address</div>
+              )}
+              {!userInfo.email && (
+                <div className="validation-message-inline">Email is required</div>
+              )}
+            </div>
+
+            <div className="input-group">
+              <label htmlFor="user-phone">
+                Phone Number <span className="required">*</span>
+              </label>
+              <input
+                id="user-phone"
+                type="tel"
+                value={userInfo.phone}
+                onChange={(e) => updateUserInfo('phone', e.target.value)}
+                className="text-input"
+                placeholder="+1234567890 or 08123456789"
+                required
+              />
+              {userInfo.phone && !isValidPhone(userInfo.phone) && (
+                <div className="validation-message-inline error">
+                  Please enter a valid phone number (7-15 digits, with optional country code)
+                </div>
+              )}
+              {!userInfo.phone && (
+                <div className="validation-message-inline">Phone number is required</div>
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="cart-footer">

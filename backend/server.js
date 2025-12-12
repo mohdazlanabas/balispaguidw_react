@@ -10,6 +10,13 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
+// Root message for quick health check
+app.get('/', (_req, res) => {
+  res.send(
+    'Bali Spa Directory API is running. Use /api/filters, /api/spas, or start the frontend at http://localhost:5173.'
+  );
+});
+
 // API – filters
 app.get('/api/filters', (req, res) => {
   res.json(getFilterOptions());
