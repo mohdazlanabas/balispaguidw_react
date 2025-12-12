@@ -65,19 +65,27 @@ app.post('/api/send-booking-emails', async (req, res) => {
       return res.status(400).json({ error: 'Invalid booking data' });
     }
 
-    // Send emails
-    const result = await sendBookingEmails({ userInfo, cartItems });
-
+    // Send response immediately, then send emails in background
     res.json({
       success: true,
-      message: 'Booking emails sent successfully',
-      ...result
+      message: 'Booking confirmed. Emails will be sent shortly.',
+      emailsSent: false
     });
+
+    // Send emails asynchronously (non-blocking)
+    sendBookingEmails({ userInfo, cartItems })
+      .then(result => {
+        console.log('✅ Emails sent successfully:', result);
+      })
+      .catch(error => {
+        console.error('❌ Error sending emails:', error.message);
+      });
+
   } catch (error) {
     console.error('Error in /api/send-booking-emails:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to send booking emails',
+      error: 'Failed to process booking',
       message: error.message
     });
   }
