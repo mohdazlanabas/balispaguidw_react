@@ -26,7 +26,7 @@ services:
     container_name: balispaguide-pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: azlan@net1io.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_PASSWORD: treasure2020a
     ports:
       - "5050:80"
     depends_on:

@@ -1,10 +1,48 @@
 // frontend/src/components/Header.jsx
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext.jsx';
 
 export default function Header() {
   const { cartItems } = useCart();
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // Check if user is logged in
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    // Clear localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+
+    // Update state
+    setUser(null);
+
+    // Redirect to home
+    navigate('/');
+  };
+
+  const handleLogin = () => {
+    navigate('/login');
+  };
+
+  const goToAccount = () => {
+    if (user) {
+      if (user.role === 'spa_owner') {
+        navigate('/spa-owner');
+      } else if (user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/account');
+      }
+    }
+  };
 
   return (
     <header className="app-header">
@@ -21,9 +59,21 @@ export default function Header() {
         </Link>
       </nav>
       <div className="app-header-right">
-        <div className="app-header-tagline">
-          Discover and compare spas across Bali.
-        </div>
+        {user ? (
+          <div className="header-auth-section">
+            <div className="user-info-compact" onClick={goToAccount}>
+              <span className="user-name">{user.name}</span>
+              <span className={`user-role-badge role-${user.role}`}>{user.role}</span>
+            </div>
+            <button onClick={handleLogout} className="btn-logout">
+              Logout
+            </button>
+          </div>
+        ) : (
+          <button onClick={handleLogin} className="btn-login">
+            Login
+          </button>
+        )}
       </div>
     </header>
   );

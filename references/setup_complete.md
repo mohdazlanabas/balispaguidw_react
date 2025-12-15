@@ -65,7 +65,7 @@ open http://localhost:5050
 
 # Login:
 Email: azlan@net1io.com
-Password: admin
+Password: treasure2020a
 
 # Add server:
 Name: Local Balispaguide

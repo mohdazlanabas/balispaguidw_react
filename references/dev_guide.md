@@ -66,14 +66,14 @@ npm run dev
 - **Backend API**: http://localhost:4000
 - **Database UI (pgAdmin)**: http://localhost:5050
   - Email: `azlan@net1io.com`
-  - Password: `admin`
+  - Password: `treasure2020a`
 
 ## Database Management
 
 ### Using pgAdmin (Recommended for Beginners)
 
 1. Open http://localhost:5050
-2. Login with `azlan@net1io.com` / `admin`
+2. Login with `azlan@net1io.com` / `treasure2020a`
 3. Right-click "Servers" → "Register" → "Server"
 4. General tab:
    - Name: `Local Balispaguide`

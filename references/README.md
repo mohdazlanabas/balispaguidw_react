@@ -14,6 +14,7 @@ All project documentation is organized in this folder for easy access.
 
 - **[database.md](database.md)** - Complete database documentation (schema, queries, management)
 - **[docker_postgresql_success.md](docker_postgresql_success.md)** - Docker & PostgreSQL setup guide
+- **[login.md](login.md)** - Test account credentials and login reference
 
 ## 📋 Development Planning
 

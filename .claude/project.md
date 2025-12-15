@@ -9,20 +9,22 @@ A full-stack web application for browsing and booking spa treatments in Bali. Fe
 - **Runtime**: Node.js with Express 5.2.1
 - **Port**: 4000
 - **Data**: CSV-based (bsg_spas.csv) with 1059 spas + PostgreSQL for users/bookings
-- **Database**: PostgreSQL 15 (Docker for local, Cloud SQL for production)
-- **Authentication**: JWT with bcrypt password hashing
-- **APIs**: RESTful endpoints for filters, spa listings, auth, bookings
-- **Dependencies**: express, cors, csv-parse, pg, bcrypt, jsonwebtoken, nodemailer
+- **Database**: PostgreSQL 15.15 (Docker for local, Cloud SQL for production)
+- **Authentication**: JWT with bcrypt password hashing (10 rounds)
+- **Session Management**: JWT tokens stored in user_sessions table with 7-day expiry
+- **APIs**: RESTful endpoints for filters, spa listings, auth, bookings, user management
+- **Dependencies**: express, cors, csv-parse, pg, bcrypt, jsonwebtoken, nodemailer, dotenv
 
 ### Frontend
 - **Framework**: React 19.2.1
 - **Build Tool**: Vite 7.2.7
-- **Routing**: React Router DOM 7.10.1
+- **Routing**: React Router DOM 7.10.1 with role-based redirects
 - **Port**: 5173 (development)
-- **State Management**: React Context API (CartContext, AuthContext)
-- **Storage**: localStorage for cart + JWT token
-- **Authentication**: JWT stored in localStorage
-- **Theme**: Professional blue (#1e3a8a primary, #3b82f6 accent)
+- **State Management**: React Context API (CartContext) + localStorage for auth
+- **Storage**: localStorage for cart + JWT token + user data
+- **Authentication**: JWT stored in localStorage with user info (id, email, name, role)
+- **Authorization**: Role-based pages (user, spa_owner, admin)
+- **Theme**: Professional blue (#1e3a8a primary, #3b82f6 accent) + role-specific colors
 
 ## Architecture
 
@@ -30,22 +32,22 @@ A full-stack web application for browsing and booking spa treatments in Bali. Fe
 ```
 backend/
 ├── config/
-│   └── db.js                   # PostgreSQL connection pool
+│   └── db.js                   # PostgreSQL connection pool with dotenv
 ├── middleware/
-│   ├── auth.js                 # JWT authentication middleware
-│   └── roleCheck.js            # Role-based access control
+│   └── auth.js                 # JWT authentication + role checking
 ├── routes/
-│   ├── auth.js                 # Register, login, logout
-│   ├── user.js                 # User profile and bookings
-│   ├── spa.js                  # Spa owner dashboard
-│   └── admin.js                # Admin CMS
+│   └── auth.js                 # Register, login, logout, me, users (admin)
 ├── migrations/
-│   └── 001_initial.sql         # Database schema
+│   └── 001_initial.sql         # Complete schema with 6 tables + seed data
 ├── server.js                   # Express server with CORS, API routes
 ├── spaData.js                  # CSV parser, filtering, sorting logic
 ├── emailService.js             # Email notifications
-├── bsg_spas.csv                # Spa directory data
-├── .env.local                  # Local development config
+├── bsg_spas.csv                # Spa directory data (1059 spas)
+├── .env.local                  # Local dev config (DB, JWT, CORS)
+├── test-db.js                  # Database connection test
+├── test-all-logins.js          # Verify all test accounts
+├── test-login-api.js           # API endpoint testing
+├── fix-passwords.js            # Password hash generator
 └── package.json                # Dependencies and scripts
 ```
 
@@ -53,43 +55,49 @@ backend/
 ```
 frontend/
 ├── src/
-│   ├── main.jsx                    # Router setup with CartProvider
-│   ├── App.jsx                     # Root component
+│   ├── main.jsx                    # Router setup with all routes
 │   ├── pages/
-│   │   ├── HomePage.jsx            # Main directory with filters
+│   │   ├── HomePage.jsx            # Main directory with filters + Header
 │   │   ├── LocationPage.jsx        # 28 location cards + filtered view
 │   │   ├── TreatmentPage.jsx       # 20 treatment cards + filtered view
 │   │   ├── CartPage.jsx            # Cart management with pricing
 │   │   ├── PaymentPage.jsx         # Booking summary with total
-│   │   ├── MyAccountPage.jsx       # User profile and booking history
-│   │   ├── SpaDashboardPage.jsx    # Spa owner bookings view
-│   │   ├── AdminPage.jsx           # Admin CMS
+│   │   ├── PaymentSuccessPage.jsx  # Payment confirmation
+│   │   ├── MyAccountPage.jsx       # User profile with "Go to Spa Guide"
+│   │   ├── SpaOwnerPage.jsx        # Spa owner dashboard
+│   │   ├── AdminPage.jsx           # Admin users list + stats
 │   │   └── auth/
-│   │       ├── LoginPage.jsx       # User login
+│   │       ├── LoginPage.jsx       # User login with role redirects
 │   │       └── RegisterPage.jsx    # User registration
 │   ├── components/
-│   │   ├── Header.jsx              # Navigation with cart badge + login
+│   │   ├── Header.jsx              # Nav + cart badge + login/logout
 │   │   ├── SpaCard.jsx             # Treatment selection + Add to Cart
 │   │   ├── SortDropdown.jsx        # 6 sort options
-│   │   └── auth/
-│   │       ├── ProtectedRoute.jsx  # Route guard
-│   │       └── RoleRoute.jsx       # Role-based route guard
 │   │   ├── FilterBar.jsx           # Location/treatment/budget filters
+│   │   ├── auth/
+│   │   │   ├── LoginForm.jsx       # Login form component
+│   │   │   └── RegisterForm.jsx    # Registration form component
 │   │   └── [other components]
 │   ├── context/
-│   │   └── CartContext.jsx         # Cart state + TREATMENT_PRICE constant
-│   └── styles.css                  # Complete styling (~950+ lines)
+│   │   └── CartContext.jsx         # Cart state + TREATMENT_PRICE
+│   └── styles.css                  # Complete styling (~2176 lines)
 └── [config files]
 ```
 
 ## Features
 
-### 1. Multi-Page Navigation (3 Pages)
+### 1. Multi-Page Navigation
 - **Home** (`/`): Main spa directory with filters, sorting, pagination
 - **Locations** (`/locations`, `/locations/:location`): 28 location cards or filtered spa list
 - **Treatments** (`/treatments`, `/treatments/:treatment`): 20 treatment cards or filtered spa list
 - **Cart** (`/cart`): Shopping cart management
 - **Payment** (`/payment`): Booking confirmation
+- **Auth Pages**:
+  - `/login`: User login with role-based redirects
+  - `/register`: New user registration
+  - `/account`: Regular user profile (roger@net1io.com)
+  - `/spa-owner`: Spa owner dashboard (spaowner@net1io.com)
+  - `/admin`: Admin dashboard with users table (azlan@net1io.com)
 
 ### 2. Sorting Options (6 Total)
 - Rating: High to Low / Low to High
@@ -117,6 +125,26 @@ frontend/
 - Display: spa, location, treatment, price, date, time
 - Formatted total price (Indonesian Rupiah)
 - Confirmation clears cart and returns home
+
+### 6. User Authentication & Authorization
+- JWT-based authentication with bcrypt password hashing
+- Login/logout functionality with token management
+- User registration with email validation
+- Role-based access control (user, spa_owner, admin)
+- Persistent login state across pages using localStorage
+- Header displays login/logout button based on auth state
+- User info display with role badges in header
+- Automatic role-based redirects on login
+
+### 7. User Account Pages
+- **My Account** (`/account`): User profile for regular users with "Go to Spa Guide" button
+- **Spa Owner Dashboard** (`/spa-owner`): Spa owner interface with logout only
+- **Admin Dashboard** (`/admin`): Complete user management with:
+  - Users table showing all registered users
+  - Stats cards (total users, spa owners, regular users)
+  - User details (name, email, phone, role, status, created date)
+  - Role badges and status indicators
+  - Admin-only access with role verification
 
 ## Data Model
 
@@ -188,6 +216,69 @@ Returns:
 ### GET /api/spas/:id
 Returns single spa object by ID.
 
+### POST /api/auth/register
+Register a new user account.
+Request body:
+```javascript
+{
+  email: string,      // Required, validated format
+  password: string,   // Required, min 6 characters
+  name: string,       // Required
+  phone: string       // Optional
+}
+```
+
+Returns:
+```javascript
+{
+  success: true,
+  message: "User registered successfully.",
+  user: {
+    id: number,
+    email: string,
+    name: string,
+    phone: string,
+    role: string,
+    created_at: timestamp
+  }
+}
+```
+
+### POST /api/auth/login
+Authenticate user and receive JWT token.
+Request body:
+```javascript
+{
+  email: string,
+  password: string
+}
+```
+
+Returns:
+```javascript
+{
+  success: true,
+  message: "Login successful.",
+  token: string,      // JWT token (7-day expiry)
+  user: {
+    id: number,
+    email: string,
+    name: string,
+    phone: string,
+    role: string      // "user" | "spa_owner" | "admin"
+  }
+}
+```
+
+### POST /api/auth/logout
+Logout user and invalidate token (requires authentication).
+
+### GET /api/auth/me
+Get current user information (requires authentication).
+
+### GET /api/users
+Get all registered users (admin only, requires authentication).
+
 ## Running the Application
 
 ### Development Mode (with Docker)
@@ -218,8 +309,13 @@ npm run dev
 - Frontend: http://localhost:5173
 - Backend: http://localhost:4000
 - Database UI: http://localhost:5050 (pgAdmin)
-  - Email: `admin@balispaguide.com`
-  - Password: `admin`
+  - Email: `azlan@net1io.com`
+  - Password: `treasure2020a`
+
+**Test Accounts** (see [references/login.md](../references/login.md) for details):
+- **Regular User**: roger@net1io.com / user123
+- **Spa Owner**: spaowner@net1io.com / spa123
+- **Admin**: azlan@net1io.com / admin123
 
 **Stop Everything:**
 ```bash
@@ -239,9 +335,16 @@ npm run preview            # Preview production build
 
 ## Environment Variables
 
-### Backend
+### Backend (.env.local)
+- `DATABASE_URL`: PostgreSQL connection string
+- `JWT_SECRET`: Secret key for JWT token signing
+- `SESSION_EXPIRY`: Token expiration time (default: 7d)
 - `PORT`: Server port (default: 4000)
 - `NODE_ENV`: Environment (development/production)
+- `CORS_ORIGIN`: Allowed origin for CORS (default: http://localhost:5173)
+- `EMAIL_SERVICE`: Email service provider (gmail/sendgrid)
+- `EMAIL_FROM`: Sender email address
+- `SENDGRID_API_KEY` or Gmail credentials: Email service authentication
 
 ### Frontend
 - `VITE_API_BASE`: Backend API URL (default: http://localhost:4000)
@@ -276,13 +379,18 @@ npm run preview            # Preview production build
 - Full pricing display (Rp 1,000,000 per treatment)
 - localStorage persistence
 
-### Phase 2: User Authentication (Planned)
-- Login page with JWT authentication
-- User registration and profile management
-- Password reset functionality
-- Protected routes
-- User booking history
-- Session management
+### Phase 2: User Authentication ✅ (Completed)
+- ✅ Login page with JWT authentication
+- ✅ User registration with email validation
+- ✅ Role-based access control (user, spa_owner, admin)
+- ✅ Session management with token storage
+- ✅ Persistent login state across pages
+- ✅ Header with login/logout functionality
+- ✅ User account pages (My Account, Spa Owner, Admin)
+- ✅ Admin dashboard with user management
+- ⏳ Password reset functionality (planned)
+- ⏳ Protected routes with middleware (planned)
+- ⏳ User booking history (planned)
 
 ### Phase 3: Payment Integration (Planned)
 - Stripe payment processing
@@ -299,12 +407,18 @@ npm run preview            # Preview production build
 - Gmail/SendGrid configuration support
 - HTML-formatted email templates
 
-### Phase 5: Database Migration (Planned)
-- Cloud SQL PostgreSQL or MongoDB setup
-- User accounts table
-- Booking records table
-- Payment transactions table
-- Spa favorites/wishlist
+### Phase 5: Database Migration ✅ (Completed)
+- ✅ PostgreSQL 15.15 setup with Docker
+- ✅ User accounts table with authentication
+- ✅ User sessions table for JWT management
+- ✅ Spa owners table
+- ✅ Bookings table
+- ✅ Orders table for payment tracking
+- ✅ Admin logs table
+- ✅ Database migrations system
+- ✅ Auto-updating timestamps with triggers
+- ⏳ Cloud SQL deployment (planned)
+- ⏳ Spa favorites/wishlist (planned)
 
 ### Phase 6: Additional Features (Planned)
 - SMS notifications (Twilio)
@@ -349,30 +463,50 @@ export const useCart = () => {
 ## Testing
 
 ### Manual Testing Checklist
-- [ ] All 3 pages load correctly
-- [ ] Navigation works (Home, Locations, Treatments, Cart)
-- [ ] Location filter shows 28 cards, clicking filters spas
-- [ ] Treatment filter shows 20 cards, clicking filters spas
-- [ ] All 6 sort options work (rating, budget, alphabetical)
-- [ ] Add to Cart shows success message
-- [ ] Cart badge shows correct count
-- [ ] Cart persists after page refresh
-- [ ] Date picker prevents past dates
-- [ ] Time dropdown shows 9 AM - 4 PM (8 slots)
-- [ ] Payment button disabled until all items complete
-- [ ] Payment page shows all bookings with prices
-- [ ] Total price calculates correctly
-- [ ] Confirm payment clears cart and redirects home
-- [ ] Pricing displays as Rp 1,000,000 per treatment
-- [ ] All treatments visible on spa cards
+
+**Spa Directory & Shopping:**
+- [x] All 3 pages load correctly
+- [x] Navigation works (Home, Locations, Treatments, Cart)
+- [x] Location filter shows 28 cards, clicking filters spas
+- [x] Treatment filter shows 20 cards, clicking filters spas
+- [x] All 6 sort options work (rating, budget, alphabetical)
+- [x] Add to Cart shows success message
+- [x] Cart badge shows correct count
+- [x] Cart persists after page refresh
+- [x] Date picker prevents past dates
+- [x] Time dropdown shows 9 AM - 4 PM (8 slots)
+- [x] Payment button disabled until all items complete
+- [x] Payment page shows all bookings with prices
+- [x] Total price calculates correctly
+- [x] Confirm payment clears cart and redirects home
+- [x] Pricing displays as Rp 1,000,000 per treatment
+- [x] All treatments visible on spa cards
+
+**Authentication & User Management:**
+- [x] User registration works with validation
+- [x] User login with all three test accounts
+- [x] JWT token stored in localStorage
+- [x] Login state persists across page navigation
+- [x] Header shows login button when not authenticated
+- [x] Header shows user info + logout when authenticated
+- [x] Role-based redirects on login (user→account, spa_owner→spa-owner, admin→admin)
+- [x] My Account page displays for regular users
+- [x] Spa Owner page displays for spa owners
+- [x] Admin page shows all users table
+- [x] Admin page shows user statistics
+- [x] Logout clears token and redirects to home
+- [ ] Protected routes redirect unauthenticated users
+- [ ] Password reset functionality
+- [ ] Session expiry handling
 
 ## Known Issues/Limitations
-- Payment is simulated (Stripe integration in development)
-- No user authentication yet (in development)
-- No email confirmations
-- No SMS notifications
+- Payment is simulated (Stripe integration planned)
+- No protected routes middleware yet (Day 4 task)
+- No password reset functionality yet
+- No session expiry handling on frontend yet
+- No SMS notifications yet (Twilio integration planned)
 - No actual spa availability checking
-- CSV-based data (will migrate to Cloud SQL)
+- Spa data still CSV-based (functional PostgreSQL for users/bookings)
 
 ## Git Repository
 - **Branch**: main
@@ -381,13 +515,18 @@ export const useCart = () => {
 
 ## Support Resources
 - **README.md**: User-facing documentation
-- **references/plan.md**: Development timeline and task tracking
+- **references/plan.md**: Development timeline and task tracking (Days 1-3 completed)
 - **references/dev_guide.md**: Complete local development guide with Docker
+- **references/database.md**: Complete database documentation and schema
+- **references/login.md**: Test account credentials and access details
 - **deployment.md**: Production deployment guide
-- **docker-compose.yml**: Local PostgreSQL setup
-- **backend/migrations/001_initial.sql**: Database schema
-- **backend/config/db.js**: Database connection
-- **backend/spaData.js**: Data processing logic documentation
+- **docker-compose.yml**: Local PostgreSQL + pgAdmin setup
+- **backend/migrations/001_initial.sql**: Complete database schema with seed data
+- **backend/config/db.js**: Database connection with environment variables
+- **backend/middleware/auth.js**: JWT authentication and role verification
+- **backend/routes/auth.js**: Authentication endpoints
+- **backend/test-db.js**: Database connection testing script
+- **backend/test-login-api.js**: Login API endpoint testing script
 - **frontend/src/context/CartContext.jsx**: Cart system implementation
 
 ## Development Notes
@@ -400,6 +539,11 @@ export const useCart = () => {
 - Hover: `#e0e7ff` (light purple-blue)
 - Success: `#10b981` (green)
 - Error: `#ef4444` (red)
+
+### Role Badge Colors
+- Admin: `#ef4444` (red gradient)
+- Spa Owner: `#f59e0b` (amber/orange gradient)
+- User: `#3b82f6` (blue gradient)
 
 ### Time Slots
 ```javascript
@@ -427,24 +571,59 @@ const formatPrice = (price) => {
 ```
 
 ## Recent Changes
+
+### Day 3 (December 16, 2025) - Authentication UI & Admin Dashboard
+- ✅ Added login/logout buttons to Header with conditional display
+- ✅ Implemented persistent login state across all pages
+- ✅ Created user info display in header with role badges
+- ✅ Removed "Back to Spa Guide" from Spa Owner page (logout only)
+- ✅ Created AdminPage with users table and statistics
+- ✅ Added GET /api/users endpoint (admin-only)
+- ✅ Implemented role-based navigation on login
+- ✅ Added comprehensive CSS for auth UI (283 lines)
+- ✅ All test accounts verified working with API
+
+### Day 2 (December 15, 2025) - Database Setup & Authentication Backend
+- ✅ Set up PostgreSQL 15.15 with Docker Compose
+- ✅ Created complete database schema (6 tables with migrations)
+- ✅ Implemented JWT authentication with bcrypt
+- ✅ Created auth routes (register, login, logout, me)
+- ✅ Added user session management
+- ✅ Created test scripts (test-db.js, test-login-api.js, fix-passwords.js)
+- ✅ Updated pgAdmin credentials (azlan@net1io.com / treasure2020a)
+- ✅ Created comprehensive database.md documentation
+- ✅ Created login.md with all test account credentials
+- ✅ Fixed password hashing for all test accounts
+
+### Day 1 (December 14, 2025) - Initial Deployment
 - ✅ Deployed to Digital Ocean (http://170.64.148.27)
 - ✅ Implemented email notification system with nodemailer
 - ✅ Created automated deployment script (deploy.sh)
 - ✅ Added customer and spa booking email confirmations
 - ✅ Created comprehensive deployment guide (deployment.md)
-- ✅ Documented email configuration (references/email_deploy.md)
 - ✅ Set up PM2 process manager for backend
 - ✅ Configured Nginx for frontend hosting and API proxy
 - ✅ Added pricing display to all pages
 - ✅ Made all treatments visible on spa cards
-- ✅ Updated README with planned features
 - ✅ Implemented shopping cart with localStorage
 - ✅ Added mandatory date/time booking
 - ✅ Created payment flow
 
 ---
 
-**Last Updated**: December 14, 2025
-**Project Status**: Deployed to Production on Digital Ocean
+**Last Updated**: December 16, 2025
+**Project Status**: Development Active - Days 1-3 Complete (35% done)
 **Production URL**: http://170.64.148.27
-**Next Steps**: Configure SSL/HTTPS, custom domain, email service (Gmail/SendGrid)
+**Current Phase**: Authentication & User Management ✅
+**Next Phase**: Protected Routes & Middleware (Day 4)
+
+## Progress Tracking
+- **Completed**: Days 1, 2, 3 (ahead of schedule)
+- **Progress**: 35% (3.5/10 days)
+- **Next Session**: Day 4 - Protected Routes & Security
+  - Create ProtectedRoute component
+  - Create RoleRoute component
+  - Protect API endpoints
+  - Test unauthorized access redirects
+  - Add session expiry handling
+  - Implement password change functionality

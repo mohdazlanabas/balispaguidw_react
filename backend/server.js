@@ -1,15 +1,24 @@
 // backend/server.js
+// Load environment variables first
+require('dotenv').config({ path: require('path').join(__dirname, '.env.local') });
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { getFilterOptions, querySpas, getSpaById } = require('./spaData');
 const { sendBookingEmails } = require('./emailService');
 
+// Import auth routes
+const authRoutes = require('./routes/auth');
+
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(express.json());
+
+// Auth routes
+app.use('/api/auth', authRoutes);
 
 // Root message for quick health check
 app.get('/', (_req, res) => {

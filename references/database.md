@@ -84,9 +84,9 @@ CREATE TABLE users (
 **Example Data**:
 ```sql
 -- Seeded test accounts
-admin@balispaguide.com - System Admin (admin)
-test@example.com       - Test User (user)
-spa@example.com        - Spa Owner (spa_owner)
+azlan@net1io.com     - Azlan (Admin) [admin role]
+roger@net1io.com     - Roger (Test User) [user role]
+spaowner@net1io.com  - Spa Owner (Test) [spa_owner role]
 ```
 
 ---
@@ -504,9 +504,9 @@ docker exec -i balispaguide-postgres psql -U postgres -d balispaguide < backend/
 
 | Email | Name | Role | Password |
 |-------|------|------|----------|
-| admin@balispaguide.com | System Admin | admin | admin123 |
-| test@example.com | Test User | user | user123 |
-| spa@example.com | Spa Owner | spa_owner | spa123 |
+| azlan@net1io.com | Azlan (Admin) | admin | admin123 |
+| roger@net1io.com | Roger (Test User) | user | user123 |
+| spaowner@net1io.com | Spa Owner (Test) | spa_owner | spa123 |
 
 **Note**: Passwords need to be hashed with bcrypt before actual use.
 
@@ -515,7 +515,7 @@ docker exec -i balispaguide-postgres psql -U postgres -d balispaguide < backend/
 ```sql
 -- Create test order
 INSERT INTO orders (order_number, user_id, total_price, status)
-VALUES ('ORD-TEST-001', (SELECT id FROM users WHERE email = 'test@example.com'), 2000000, 'completed')
+VALUES ('ORD-TEST-001', (SELECT id FROM users WHERE email = 'roger@net1io.com'), 2000000, 'completed')
 RETURNING id;
 
 -- Create test booking (use order id from above)
@@ -525,7 +525,7 @@ INSERT INTO bookings (
 )
 VALUES (
     1,
-    (SELECT id FROM users WHERE email = 'test@example.com'),
+    (SELECT id FROM users WHERE email = 'roger@net1io.com'),
     1, 'Test Spa', 'Ubud',
     'Balinese Massage', '2025-12-25', '10:00', 1000000, 'confirmed'
 );

@@ -24,12 +24,12 @@ npm run dev
 - Backend API: http://localhost:4000
 - Database UI: http://localhost:5050
   - Email: `azlan@net1io.com`
-  - Password: `admin`
+  - Password: `treasure2020a`
 
 ## Test Accounts
-- **Admin**: `admin@balispaguide.com` / `admin123`
-- **User**: `test@example.com` / `user123`
-- **Spa Owner**: `spa@example.com` / `spa123`
+- **Admin**: `azlan@net1io.com` / `admin123`
+- **User**: `roger@net1io.com` / `user123`
+- **Spa Owner**: `spaowner@net1io.com` / `spa123`
 
 ## Stop Everything
 ```bash

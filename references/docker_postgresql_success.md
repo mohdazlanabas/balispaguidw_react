@@ -34,7 +34,7 @@ Your PostgreSQL database is now running in Docker!
 
 **Login:**
 - Email: `azlan@net1io.com`
-- Password: `admin`
+- Password: `treasure2020a`
 
 ### PostgreSQL Database
 **Connection Details:**
@@ -54,7 +54,7 @@ Your PostgreSQL database is now running in Docker!
 
 2. **Login** with:
    - Email: `azlan@net1io.com`
-   - Password: `admin`
+   - Password: `treasure2020a`
 
 3. **Add Server**:
    - Right-click "Servers" → "Register" → "Server"
